@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    tier: backend-app
+    env: dev
+    app: mysql
+    release-date: 24-Apr-2022
+spec:
+  selector:
+    matchLabels:
+      app: backend-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: backend-app
+    spec:
+      containers:
+        - name: backend-app
+          image: sansoft/test-kube-backend:0.0.1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: TZ
+              value: "Asia/Colombo"
+            - name: DB_HOST
+              value: "mysql-service"
+            - name: DB_POST
+              value: "3306"
+
+
+      
+    

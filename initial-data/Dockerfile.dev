@@ -1,0 +1,12 @@
+FROM mysql:8.0.16
+
+WORKDIR /docker-entrypoint-initdb.d
+
+COPY docker-mysql-healthcheck /usr/local/bin/
+RUN chmod 500 /usr/local/bin/docker-mysql-healthcheck
+
+COPY my.cnf /etc/mysql/conf.d/
+
+COPY dbinit.dev.sh ./000.sh
+
+HEALTHCHECK CMD ["/usr/local/bin/docker-mysql-healthcheck"]
