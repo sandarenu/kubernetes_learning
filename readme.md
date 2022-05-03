@@ -95,3 +95,26 @@ You can also use `minikube ip` to find this internal IP if you are running minik
 ```sh
 kubctl logs --follow <POD Name>
 ```
+
+## Troubleshoot Pod startup issues
+
+Run command `kubectl describe pods`. This will show some error messages thrown during startup.
+
+## Persistence volumes with Minikube
+
+* Keep in mind that minikube itself is docker container. So when we add persistence volumes to pods those are actually
+created inside minikube, not in your local machine. If you need to map those to your local machine then you first need to
+give a volume mapping to minikube. 
+If minikube is already running you have stop it and delete it first, and then start with mount path.
+
+* Delete minikube
+```
+minikube delete
+```
+
+* Start minikube with mount path
+
+```
+minikube start --mount --mount-string="<Path in the Local machice>:<Path inside Minikube>"
+
+Eg: minikube start --mount --mount-string="/hms/data/minikube-data:/hms"

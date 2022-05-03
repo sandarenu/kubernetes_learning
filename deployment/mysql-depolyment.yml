@@ -23,6 +23,10 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 3306
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+              readOnly: false
           env:
             - name: MYSQL_ROOT_PASSWORD
               value: password
@@ -32,3 +36,8 @@ spec:
               value: Asia/Colombo
             - name: TEST
               value: test
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-data
+
