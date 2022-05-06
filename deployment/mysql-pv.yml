@@ -12,6 +12,7 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: "/hms/data/mysql"
+
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

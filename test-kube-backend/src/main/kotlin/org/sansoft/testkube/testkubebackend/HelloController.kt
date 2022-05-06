@@ -7,7 +7,15 @@ import org.springframework.web.bind.annotation.RestController
 class HelloController {
 
     @GetMapping("/hello")
-    fun hello(): String{
-        return "Hello"
+    fun hello(): String {
+        var getenv: String? = System.getenv("POD_NAME")
+        return "Hello from [${getenv ?: "UNKNOW"}]"
     }
+
+    @GetMapping("/env")
+    fun envVariables(): String {
+        var envVariable: MutableMap<String, String> = System.getenv()
+        return envVariable.entries.joinToString("\n")
+    }
+
 }

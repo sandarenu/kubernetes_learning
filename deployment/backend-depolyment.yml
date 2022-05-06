@@ -11,7 +11,7 @@ spec:
   selector:
     matchLabels:
       app: backend-app
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
@@ -30,6 +30,18 @@ spec:
               value: "mysql-service"
             - name: DB_POST
               value: "3306"
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_POD_SERVICE_ACCOUNT
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
 
 
       

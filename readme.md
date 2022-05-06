@@ -1,5 +1,13 @@
 # Learning Kubernetes
 
+## Install Minikube
+
+Once minikube is installed add following alias to your bash profile. It will allow you to run `kubectl` commands without minikube prefix.
+
+```
+alias kubectl="minikube kubectl --"
+```
+
 ## Using local docker images
 
 ### Method 01
@@ -31,6 +39,19 @@ minikube image load sansoft/mysql:0.0.1
 
 
 **NOTE** For more information refer https://levelup.gitconnected.com/two-easy-ways-to-use-local-docker-images-in-minikube-cd4dcb1a5379
+
+## Redeploy new images during testing
+
+During testing, you may be updating the image and re-deploying without changing the image version. 
+In such cased you'll first have to remove the image from minikube and re-load them. 
+
+Steps to follow. 
+1. Delete the deployment (Eg: `kubectl delete -f <YML>`)
+2. Remove the image (Eg: `minikube image rm sansoft/test-kube-backend:0.0.1 `)
+3. Build the fresh image (Eg: `docker build -t ....`)
+4. Re-load the image (Eg: `minikube image load sansoft/test-kube-backend:0.0.1` )
+5. Apply the deployment (Eg: `kubectl apply -f <YML>`)
+
 
 ## Port Forwarding
 
@@ -118,3 +139,4 @@ minikube delete
 minikube start --mount --mount-string="<Path in the Local machice>:<Path inside Minikube>"
 
 Eg: minikube start --mount --mount-string="/hms/data/minikube-data:/hms"
+```
