@@ -98,7 +98,7 @@ spec:
     nodePort: 30080
 ```
 
-After configuring and creating the serive you can access your APIs using kubernetes internal IP. Use following to find that internal IP.
+After configuring and creating the serice you can access your APIs using kubernetes internal IP. Use following to find that internal IP.
 ```
 > kubectl describe node minikube | grep InternalIP
 InternalIP:  192.168.49.2
@@ -111,10 +111,16 @@ http://192.168.49.2:30080/hello
 
 You can also use `minikube ip` to find this internal IP if you are running minikube.
 
+### Another way to get Service URL
+
+`minikube service <Service Name> --url`
+
+Eg: `minikube service app-0 --url`
+
 ## Tail logs inside a POD
 
 ```sh
-kubctl logs --follow <POD Name>
+kubectl logs --follow <POD Name>
 ```
 
 ## Troubleshoot Pod startup issues
@@ -140,3 +146,121 @@ minikube start --mount --mount-string="<Path in the Local machice>:<Path inside 
 
 Eg: minikube start --mount --mount-string="/hms/data/minikube-data:/hms"
 ```
+
+## Stateful Set
+
+StatefulSet needs a Headless Service. In normal service traffic is routed to any of the pods under the service
+In a StatefulSet traffic can't be routed to any pod randomly, it should be routed to the master node.
+Eg: MySql Cluster
+
+### Exposing individual pod in a StatefulSet
+
+* StatefulSet Pods have the `label: statefulset.kubernetes.io/pod-name` which contains their generated name (`<StatefulSet Name>-<Ordinal>`). 
+* You can create individual Services for each instance that use that label as their selector to expose the individual instances of the StatefulSet.
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-0
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    statefulset.kubernetes.io/pod-name: web-2
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30088
+```
+Refer: https://itnext.io/exposing-statefulsets-in-kubernetes-698730fb92a1
+
+## Minikube Storage Class
+
+* Use `minikube ssh` to access inside minikube machine
+* Persistence volumes are normally stored at `/tmp/hostpath-provisioner/default`
+
+## Minikube storage
+https://platform9.com/blog/tutorial-dynamic-provisioning-of-persistent-storage-in-kubernetes-with-minikube/
+
+## Ingress
+
+https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
+* First enable ingress addon in minikube using `minikube addons enable ingress`
+
+* Ingress configuration
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - host: hello-world.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web-0
+                port:
+                  number: 80
+```
+
+* After apply ingress config using `kubectl apply -f <YML>` use `kubectl get ingress` to see the status of ingress.
+```
+NAME              CLASS   HOSTS              ADDRESS        PORTS   AGE
+example-ingress   nginx   hello-world.info   192.168.49.2   80      12m
+```
+* Wait till IP appear under `ADDRESS`. Once that is available you can add the DNS entry to your `/etc/hosts` file
+```
+192.168.49.2 hello-world.info
+```
+* Then from browser access URL `http://hello-world.info`, you will see the exposed service.
+
+### Adding second path
+
+* Update ingress config as bellow. Second path can be added as 
+```
+          - path: /v2
+            pathType: Prefix
+            backend:
+              service:
+                name: web-1
+                port:
+                  number: 80
+```
+* Update ingress config
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - host: hello-world.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web-0
+                port:
+                  number: 80
+          - path: /v2
+            pathType: Prefix
+            backend:
+              service:
+                name: web-1
+                port:
+                  number: 80
+```
+* Second service can be accessed via `http://hello-world.info/v2`
+
