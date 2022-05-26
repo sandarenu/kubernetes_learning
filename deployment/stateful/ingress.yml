@@ -23,3 +23,10 @@ spec:
                 name: web-1
                 port:
                   number: 80
+          - path: /v3
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80

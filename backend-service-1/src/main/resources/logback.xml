@@ -14,7 +14,7 @@
   -->
 
 <configuration>
-    <property name="LOG_PATH" value="/hms/logs/backend/"/>
+    <property name="LOG_PATH" value="/hms/logs/backend1/"/>
 
     <!-- These parameters can be configured as enviromental variables in docker -->
     <variable name="FRAMEWORK_LOG_LEVEL" value="${FRAMEWORK_LOG_LEVEL:-ERROR}"/>
@@ -74,8 +74,8 @@
     </logger>
     
 
-    <root level="ERROR">
-        <appender-ref ref="error-appender"/>
+    <root level="DEBUG">
+        <appender-ref ref="debug-appender"/>
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

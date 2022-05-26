@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.sansoft.testkube</groupId>
-	<artifactId>test-kube-backend</artifactId>
+	<artifactId>backend-service-1</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>test-kube-backend</name>
+	<name>backend-service-1</name>
 	<description>Spring Boot backend for testing kubernetes</description>
 	<properties>
 		<java.version>17</java.version>

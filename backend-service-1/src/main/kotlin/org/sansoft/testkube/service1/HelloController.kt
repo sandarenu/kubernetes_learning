@@ -1,4 +1,4 @@
-package org.sansoft.testkube.testkubebackend
+package org.sansoft.testkube.service1
 
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping

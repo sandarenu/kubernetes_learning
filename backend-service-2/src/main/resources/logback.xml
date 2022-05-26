@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ (C) Copyright 2006-2019 hSenid Mobile Solutions (Pvt) Limited.
+  ~
+  ~ All Rights Reserved.
+  ~
+  ~ These materials are unpublished, proprietary, confidential source code of
+  ~ hSenid Mobile Solutions (Pvt) Limited and constitute a TRADE SECRET
+  ~ of hSenid Mobile Solutions (Pvt) Limited.
+  ~
+  ~ hSenid Mobile Solutions (Pvt) Limited retains all title to and intellectual
+  ~ property rights in these materials.
+  ~
+  -->
+
+<configuration>
+    <property name="LOG_PATH" value="/hms/logs/backend/"/>
+
+    <!-- These parameters can be configured as enviromental variables in docker -->
+    <variable name="FRAMEWORK_LOG_LEVEL" value="${FRAMEWORK_LOG_LEVEL:-ERROR}"/>
+    <variable name="GRAPHQL_LOG_LEVEL" value="${GRAPHQL_LOG_LEVEL:-ERROR}"/>
+    <variable name="HIKARY_LOG_LEVEL" value="${HIKARY_LOG_LEVEL:-ERROR}"/>
+
+    <variable name="JOOQ_LOG_LEVEL" value="${JOOQ_LOG_LEVEL:-INFO}"/>
+    <variable name="APP_LOG_LEVEL" value="${APP_LOG_LEVEL:-DEBUG}"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder>
+            <pattern>%date{yyyy:MM:dd HH:mm:ss:SSS} %-5level [%thread] [${PID:-}] %logger{1} T[%X{X-B3-TraceId:-}]
+                S[%X{X-B3-SpanId:-}] PS[%X{B3-ParentSpanId:-}] - %msg %n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="debug-appender"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/debug.log</file>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/debug.%d{yyyy-MM-dd}.log
+            </fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date{yyyy:MM:dd HH:mm:ss:SSS} %-5level [%thread] [${PID:-}] %logger{1} T[%X{X-B3-TraceId:-}]
+                S[%X{X-B3-SpanId:-}] PS[%X{B3-ParentSpanId:-}] - %msg %n
+            </pattern>
+        </encoder>
+    </appender>
+    
+    <logger name="org" level="${FRAMEWORK_LOG_LEVEL}" additivity="true">
+        <appender-ref ref="debug-appender"/>
+    </logger>
+
+    <logger name="org.springframework" level="${FRAMEWORK_LOG_LEVEL}" additivity="true">
+        <appender-ref ref="debug-appender"/>
+    </logger>
+    
+    <logger name="com.zaxxer.hikari" level="${HIKARY_LOG_LEVEL}" additivity="true">
+        <appender-ref ref="debug-appender"/>
+    </logger>
+
+    <logger name="org.jooq" level="${JOOQ_LOG_LEVEL}">
+        <appender-ref ref="debug-appender"/>
+    </logger>
+
+    <logger name="org.sansoft" level="${APP_LOG_LEVEL}" additivity="true">
+        <appender-ref ref="debug-appender"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    
+
+    <root level="DEBUG">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
