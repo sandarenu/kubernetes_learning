@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-1
+  labels:
+    app: backend-app-1
+    tier: backend
+    env: dev
+    release-date: 27-May-2022
+spec:
+  selector:
+    matchLabels:
+      app: backend-app-1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: backend-app-1
+    spec:
+      containers:
+        - name: backend-app-1
+          image: sansoft/backend-service-1:0.0.2
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: TZ
+              value: "Asia/Colombo"
+            - name: DB_HOST
+              value: "mysql-service"
+            - name: DB_POST
+              value: "3306"
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_POD_SERVICE_ACCOUNT
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
+          envFrom:
+            - configMapRef:
+                name: backend-app-1-configs
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service-1
+spec:
+  type: NodePort
+  selector:
+    app: backend-app-1
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30080
+      
+    
