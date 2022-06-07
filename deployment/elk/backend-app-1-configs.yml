@@ -1,0 +1,8 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: backend-app-1-configs
+data:
+  TASK_SERVICE_URL: backend-service-2
+  DB_HOST: mysql-service
+  DB_POST: '3306'
