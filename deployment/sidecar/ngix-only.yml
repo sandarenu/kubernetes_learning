@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-test-deployment
+  labels:
+    app: nginx-test
+    tier: backend
+    env: dev
+    release-date: 27-May-2022
+spec:
+  selector:
+    matchLabels:
+      app: nginx-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-test
+    spec:
+      containers:
+        - name: nginx-test
+          image: nginx:1.21.6
+          volumeMounts:
+            - name: nginx-config-2
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+          ports:
+            - name: http
+              containerPort: 8080
+      volumes:
+        - name: nginx-config-2
+          configMap:
+            name: nginx-test-config
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-test-config
+data:
+  default.conf: |
+    
+    server {
+        listen 8080;
+        server_name  localhost;
+        location / {
+            proxy_pass http://localhost:8090;
+        }
+    }
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-test-service
+spec:
+  type: NodePort
+  selector:
+    app: nginx-test
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30095

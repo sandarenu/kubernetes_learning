@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-2
+  labels:
+    app: backend-app-2
+    tier: backend
+    env: dev
+    release-date: 27-May-2022
+spec:
+  selector:
+    matchLabels:
+      app: backend-app-2
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: backend-app-2
+    spec:
+      containers:
+        - name: backend-app-2
+          image: sansoft/backend-service-2:0.0.2
+          imagePullPolicy: Never
+          env:
+            - name: TZ
+              value: "Asia/Colombo"
+            - name: DB_HOST
+              value: "mysql-service"
+            - name: DB_POST
+              value: "3306"
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_POD_SERVICE_ACCOUNT
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
+
+        - name: nginx-proxy
+          image: nginx:1.21.6
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+          ports:
+            - name: http
+              containerPort: 8080
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: backend-service-2-nginx
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-service-2-nginx
+data:
+  default.conf: |
+    
+    server {
+        listen 8080;
+        server_name  localhost;
+        location / {
+            proxy_pass http://localhost:8090;
+        }
+    }
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service-2
+spec:
+  type: NodePort
+  selector:
+    app: backend-app-2
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30093
